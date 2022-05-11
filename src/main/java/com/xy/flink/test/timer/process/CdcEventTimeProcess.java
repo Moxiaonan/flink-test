@@ -19,6 +19,9 @@ import org.apache.flink.util.Collector;
 import java.time.Duration;
 import java.util.Objects;
 
+/**
+ * 基于事件时间 , 需要有新的数据推动 watermark 才能看到超时事件 (不一定是同一个key)
+ */
 public class CdcEventTimeProcess {
 
     public static void main(String[] args) throws Exception {

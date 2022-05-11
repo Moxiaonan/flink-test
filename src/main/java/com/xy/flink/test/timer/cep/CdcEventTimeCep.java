@@ -11,8 +11,6 @@ import org.apache.flink.cep.CEP;
 import org.apache.flink.cep.PatternStream;
 import org.apache.flink.cep.functions.PatternProcessFunction;
 import org.apache.flink.cep.functions.TimedOutPartialMatchHandler;
-import org.apache.flink.cep.nfa.aftermatch.AfterMatchSkipStrategy;
-import org.apache.flink.cep.nfa.aftermatch.SkipPastLastStrategy;
 import org.apache.flink.cep.pattern.Pattern;
 import org.apache.flink.cep.pattern.conditions.IterativeCondition;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
@@ -26,6 +24,10 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 1. CEP 必须等待 pattern 匹配事件全部到达 , 才判断是否超时 , 而不是超时的时候 , 去判断是否匹配
+ * 2. 基于事件时间 , 处理正常结果流需要新的事件推动 watermark 才能输出正常结束的结果 , 但是处理超时流时 ; 可以马上输出
+ */
 public class CdcEventTimeCep {
 
     public static void main(String[] args) throws Exception {

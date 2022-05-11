@@ -16,6 +16,9 @@ import org.apache.flink.util.Collector;
 
 import java.util.Objects;
 
+/**
+ * 基于处理时间 , 只要系统处理时间到达就能看到超时事件 , 不需要有新的数据推动 watermark
+ */
 public class CdcProcessTimeProcess {
 
     public static void main(String[] args) throws Exception {

@@ -23,6 +23,10 @@ import org.apache.flink.util.OutputTag;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 1. CEP 必须等待 pattern 匹配事件全部到达 , 才判断是否超时 , 而不是超时的时候 , 去判断是否匹配
+ * 2. 基于处理时间 , 可以实时输出正常结束的处理流的结果 , 不需要新的事件推动 watermark ; 处理超时流时 , 可以马上输出
+ */
 public class CdcProcessTimeCep {
 
     public static void main(String[] args) throws Exception {
