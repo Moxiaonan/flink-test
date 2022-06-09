@@ -25,8 +25,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 1. CEP 必须等待 pattern 匹配事件全部到达 , 才判断是否超时 , 而不是超时的时候 , 去判断是否匹配
- * 2. 基于事件时间 , 处理正常结果流需要新的事件推动 watermark 才能输出正常结束的结果 , 但是处理超时流时 ; 可以马上输出
+ * 1. 基于事件时间 , 处理正常结果流需要新的事件推动 watermark 才能输出正常结束的结果 , 但是处理超时流时 ; 可以马上输出
+ * 如 : 新增订单1 , 并 10s 内结束 , 不会马上输出 '订单结束' , 新增订单2事件到达 , 推动 watermark 后输出 ;
+ *     新增订单1 , 并 10s 内没有结束 , 新增订单2事件到达 , 推动 watermark , 则输出 '超时'
  */
 public class CdcEventTimeCep {
 
@@ -93,7 +94,7 @@ public class CdcEventTimeCep {
 
         OutputTag<String> lateDataOutputTag = new OutputTag<String>("outOfTime"){};
         patternProcessStream.print("finish");
-        patternProcessStream.getSideOutput(lateDataOutputTag).print("!!! out of time");
+        patternProcessStream.getSideOutput(lateDataOutputTag).print("!!!");
 
 
         // 启动任务
@@ -113,14 +114,14 @@ public class CdcEventTimeCep {
             }
 
             collector.collect(
-                "order:" + order_create.get(0).getAfter().getOrder_no() + " end in " + afterTime
+                "订单 : " + order_create.get(0).getAfter().getOrder_no() + " 按时完成, 时间 : " + afterTime
             );
         }
 
         @Override
         public void processTimedOutMatch(Map<String, List<SourceBinlog>> map, Context context) throws Exception {
             List<SourceBinlog> order_create = map.get("order_create");
-            context.output(new OutputTag<String>("outOfTime"){},"order: " + order_create.get(0).getAfter().getOrder_no() + " out of time");
+            context.output(new OutputTag<String>("outOfTime"){},"订单 : " + order_create.get(0).getAfter().getOrder_no() + " 已超时");
         }
     }
 

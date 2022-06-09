@@ -18,6 +18,8 @@ import java.util.Objects;
 
 /**
  * 基于处理时间 , 只要系统处理时间到达就能看到超时事件 , 不需要有新的数据推动 watermark
+ * 如 : 新增订单1 , 10s 内没有更新时间到达 , 直接输出 '超时'
+ * 如 : 新增订单1 , 10s 内更新时间到达 , 直接输出 '订单结束'
  */
 public class CdcProcessTimeProcess {
 

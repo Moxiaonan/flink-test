@@ -24,8 +24,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 1. CEP 必须等待 pattern 匹配事件全部到达 , 才判断是否超时 , 而不是超时的时候 , 去判断是否匹配
- * 2. 基于处理时间 , 可以实时输出正常结束的处理流的结果 , 不需要新的事件推动 watermark ; 处理超时流时 , 可以马上输出
+ * 1. 基于处理时间 , 可以实时输出正常结束的处理流的结果 , 不需要新的事件推动 watermark ; 处理超时流时 , 可以马上输出
+ * 2. 处理事件下 , CEP 必须等待 pattern 匹配事件全部到达 , 才判断是否超时 , 而不是超时的时候 , 去判断是否匹配
+ * 如 : 新增订单1 , 并 10s 内结束 , 马上输出 '订单结束';
+ *     新增订单1 , 并 10s 内没有结束 , 不会马上输出 '超时' , 需要等待这个订单1的状态更新事件导到 , 才会输出 '超时' , 新增订单2事件到达 , 也不会输出 '超时' ;
  */
 public class CdcProcessTimeCep {
 
@@ -90,7 +92,7 @@ public class CdcProcessTimeCep {
 
         OutputTag<String> lateDataOutputTag = new OutputTag<String>("outOfTime"){};
         patternProcessStream.print("finish");
-        patternProcessStream.getSideOutput(lateDataOutputTag).print("!!! out of time");
+        patternProcessStream.getSideOutput(lateDataOutputTag).print("!!!");
 
 
         // 启动任务
@@ -110,14 +112,14 @@ public class CdcProcessTimeCep {
             }
 
             collector.collect(
-                "order:" + order_create.get(0).getAfter().getOrder_no() + " end in " + afterTime
+                "订单 : " + order_create.get(0).getAfter().getOrder_no() + " 按时完成, 时间 : " + afterTime
             );
         }
 
         @Override
         public void processTimedOutMatch(Map<String, List<SourceBinlog>> map, Context context) throws Exception {
             List<SourceBinlog> order_create = map.get("order_create");
-            context.output(new OutputTag<String>("outOfTime"){},"order: " + order_create.get(0).getAfter().getOrder_no() + " out of time");
+            context.output(new OutputTag<String>("outOfTime"){},"订单 : " + order_create.get(0).getAfter().getOrder_no() + "  已超时");
         }
     }
 

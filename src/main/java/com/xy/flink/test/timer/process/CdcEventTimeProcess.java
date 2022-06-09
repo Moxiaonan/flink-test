@@ -20,7 +20,10 @@ import java.time.Duration;
 import java.util.Objects;
 
 /**
- * 基于事件时间 , 需要有新的数据推动 watermark 才能看到超时事件 (不一定是同一个key)
+ * 基于事件时间 , 需要有新的数据推动 watermark 才能看到超时事件 (同一个key)
+ * 如 : 新增订单1 , 10s 内收到订单1更新事件 , 可以输出 '订单结束' ;
+ *      新增订单1 , 10s 内没有收到订单1更新事件 , 但 10s 后有新增订单2事件 , 可以输出 '超时' ;
+ *      新增订单1 , 10s 后有新增订单1更新事件 , 可以输出 '超时' ;
  */
 public class CdcEventTimeProcess {
 
